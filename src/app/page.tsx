@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 
 export default function Home() {
 	const [jsonToFormat, setJsonToFormat] = useState('');
-	const [jsonFormatted, setJsonFormatted] = useState('');
+	const [jsonFormatted, setJsonFormatted] = useState<string[]>([]);
 
 	const ref = useRef<HTMLPreElement>(null);
 
@@ -52,14 +52,16 @@ export default function Home() {
 
 	return (
 		<main className='flex min-h-screen flex-col items-center justify-center p-24'>
-			<h1 className='text-4xl font-bold mb-8'>
-				Json Formatter
-			</h1>
+			<h1 className='text-4xl font-bold mb-8'>SmartJSON</h1>
+			<h2 className='text-3xl font-bold mb-8'>Json Formatter</h2>
 
 			<form
 				onSubmit={e => {
 					e.preventDefault();
-					setJsonFormatted(formatJson(jsonToFormat));
+					setJsonFormatted(prev => [
+						...prev,
+						formatJson(jsonToFormat),
+					]);
 				}}
 				className='w-full max-w-lg'>
 				<h2 className='text-xl font-semibold mb-2'>Input:</h2>
@@ -75,21 +77,34 @@ export default function Home() {
 
 			<div className='mt-8 w-full max-w-lg'>
 				<h2 className='text-xl font-semibold mb-2'>Result:</h2>
-				<pre
-					className='bg-gray-100 p-4 rounded-md overflow-x-auto whitespace-pre-wrap text-black'
-					ref={ref}>
-					<code
-						className='text-sm font-mono whitespace-pre'
-						dangerouslySetInnerHTML={{
-							__html: formatJson(jsonFormatted),
-						}}
-					/>
-				</pre>
-				<button
-					onClick={handleCopy}
-					className='mt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700'>
-					Copy to Clipboard
-				</button>
+				{jsonFormatted.map((json, index) => (
+					<div key={index} className='mt-4'>
+						<button
+							className=''
+							onClick={() => {
+								setJsonFormatted(prev =>
+									prev.filter((_, i) => i !== index),
+								);
+							}}>
+							Eliminar
+						</button>
+						<pre
+							className='bg-gray-100 p-4 rounded-md overflow-x-auto whitespace-pre-wrap text-black'
+							ref={ref}>
+							<code
+								className='text-sm font-mono whitespace-pre'
+								dangerouslySetInnerHTML={{
+									__html: formatJson(json),
+								}}
+							/>
+						</pre>
+						<button
+							onClick={handleCopy}
+							className='mt-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700'>
+							Copy to Clipboard
+						</button>
+					</div>
+				))}
 			</div>
 		</main>
 	);
